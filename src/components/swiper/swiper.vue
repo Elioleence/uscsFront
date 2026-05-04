@@ -13,9 +13,6 @@
             </div>
           </div>
         </div>
-        <div class="swiper-pagination"></div>
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
       </div>
     </div>
   </div>
@@ -24,10 +21,8 @@
 <script setup>
 import { onMounted } from 'vue'
 import Swiper from 'swiper'
-import { Navigation, Pagination, Autoplay } from 'swiper/modules'
+import { Autoplay } from 'swiper/modules'
 import 'swiper/css'
-import 'swiper/css/pagination'
-import 'swiper/css/navigation'
 
 const carouselImages = [
   '/img/swipper1.jpg',
@@ -37,114 +32,46 @@ const carouselImages = [
 
 onMounted(() => {
   new Swiper('.mySwiper3', {
-    modules: [Navigation, Pagination, Autoplay],
+    modules: [Autoplay],
     loop: true,
     autoplay: {
       delay: 3000,
       disableOnInteraction: false
-    },
-    pagination: {
-      el: '.swiper-pagination',
-      clickable: true
-    },
-    navigation: {
-      nextEl: '.swiper-button-next',
-      prevEl: '.swiper-button-prev'
     }
   })
 })
 </script>
 
 <style scoped>
-.swiper-container-wrapper {
+/* ========== 轮播容器高度 你可以自由调 ========== */
+.mySwiper3 {
   width: 100%;
-  margin-top: 86px;
-}
-
-.swiper3 {
-  padding: 0;
-  margin: 0 auto;
+  height: 560px; /* 👈 想多高就多高，不用800px！ */
   overflow: hidden;
-  background: #f0f0f0;
-  display: block;
-  width: 100%;
-  height: 400px;
+  border-radius: 12px;
+  margin: 0 auto;
+  background: #f5f5f5; /* 图片没铺满的地方用浅灰底色，非常好看 */
 }
 
-.swiper-container {
-  width: 100%;
-  height: 100%;
-}
-
+/* ========== 核心：让图片完整显示、等比缩放、不变形 ========== */
 .slide-img-box {
   width: 100%;
-  margin: 0 auto;
-  height: 400px;
-}
-
-.slide-img-box img {
-  object-fit: cover;
-  width: 100%;
-  height: 400px;
-}
-
-.swiper-pagination {
-  width: 100%;
-  left: 0;
-  bottom: 20px;
-}
-
-.swiper-pagination span.swiper-pagination-bullet {
-  border-radius: 100%;
-  margin: 0 6px;
-  background: rgba(255, 255, 255, 0.7);
-  display: inline-block;
-  width: 10px;
-  opacity: 1;
-  height: 10px;
-  transition: all 0.3s;
-}
-
-.swiper-pagination span.swiper-pagination-bullet:hover {
-  background: rgba(255, 255, 255, 1);
-  transform: scale(1.2);
-}
-
-.swiper-pagination span.swiper-pagination-bullet.swiper-pagination-bullet-active {
-  background: #fff;
-  width: 24px;
-  border-radius: 5px;
-}
-
-.swiper-button-next,
-.swiper-button-prev {
-  width: 40px;
-  height: 40px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 50%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.3s;
 }
 
-.swiper-button-next {
-  right: 20px;
+.slide-img-box img {
+  width: 100%;
+  height: auto;    /* 自动等高，等比缩小 */
+  max-height: 100%;/* 不超出容器 */
+  object-fit: cover; /* 👈 关键：完整显示图片，不裁切 */
 }
 
-.swiper-button-prev {
-  left: 20px;
-}
-
-.swiper-button-next:hover,
-.swiper-button-prev:hover {
-  background: rgba(0, 0, 0, 0.5);
-}
-
-.swiper-button-next::after,
-.swiper-button-prev::after {
-  font-size: 18px;
-  color: #fff;
-  font-weight: bold;
+/* 顶部间距 */
+.swiper-container-wrapper {
+  margin-top: 90px;
+  width: 100%;
 }
 </style>

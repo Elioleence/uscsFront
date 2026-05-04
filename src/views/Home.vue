@@ -33,11 +33,11 @@
             class="club-card"
             @click="goClub(club.id)"
           >
-            <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
+            <img :src="formatImageUrl(club.cover)" alt="社团logo" class="club-logo">
             <div class="club-info">
-              <h3>{{ club.name }}</h3>
+              <h3>{{ club.clubName }}</h3>
               <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
-              <p class="club-member">成员数：{{ club.memberCount }}</p>
+              <!-- <p class="club-member">成员数：{{ club.memberCount }}</p> -->
             </div>
           </div>
         </div>
@@ -118,7 +118,7 @@ const formatTime = (time) => {
   max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
-  padding-top: 106px;
+  padding-top: 36px;
 }
 
 .section {
