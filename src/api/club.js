@@ -24,6 +24,14 @@ export function getClubApplyList(params) {
   return request.get('/clubApply/list', { params })
 }
 
+export function submitClubApply(data) {
+  return request.post('/clubApply/submit', data)
+}
+
+export function checkClubApplyStatus(clubId) {
+  return request.get(`/clubApply/checkStatus/${clubId}`)
+}
+
 export function auditClubApply(applyId, auditStatus, auditReply = '') {
   return request({
     url: `/clubApply/audit/${applyId}`,

@@ -16,8 +16,8 @@
           </template>
         </el-input>
         
-        <el-select 
-          v-model="typeId" 
+        <el-select
+          v-model="typeId"
           placeholder="选择社团类型"
           class="type-select"
           @change="loadClubList"
@@ -34,16 +34,16 @@
           class="club-card"
           @click="goDetail(club.id)"
         >
-          <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
+          <img :src="formatImageUrl(club.cover)" alt="社团logo" class="club-logo">
           <div class="club-info">
-            <h3>{{ club.name }}</h3>
-            <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
-            <p class="club-desc">{{ club.description }}</p>
-            <div class="club-stats">
+            <h3>{{ club.clubName }}</h3>
+            <p class="club-type">{{ getClubTypeName(club.typeId) }}类</p>
+            <p class="club-desc">{{ club.intro }}</p>
+            <!-- <div class="club-stats">
               <span>成员 {{ club.memberCount }}</span>
               <span>|</span>
               <span>活动 {{ club.activityCount }}</span>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>

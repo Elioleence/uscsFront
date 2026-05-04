@@ -30,8 +30,10 @@
             <p class="activity-time">{{ activity.time }}</p>
             <p class="activity-club">{{ activity.clubName }}</p>
             <div class="activity-tags">
-              <span class="tag">{{ getActivityTypeName(activity.typeId) }}</span>
-              <span class="tag participants">报名人数：{{ activity.participants }}</span>
+              <span class="tag">{{ getActivityTypeName(activity.typeId) }}类</span>
+              <span :class="['tag', getEnrollStatus(activity) === '报名中' ? 'enrolling' : 'enrolled']">
+                {{ getEnrollStatus(activity) }}
+              </span>
             </div>
           </div>
         </div>
@@ -99,6 +101,19 @@ const getActivityTypeName = (typeId) => {
     5: '其他'
   }
   return typeMap[typeId] || '未知类型'
+}
+
+const getEnrollStatus = (activity) => {
+  const deadline = activity.enrollDeadline || activity.enroll_deadline
+  if (!deadline) {
+    return '不限时'
+  }
+  const deadlineDate = new Date(deadline)
+  const now = new Date()
+  if (now < deadlineDate) {
+    return '报名中'
+  }
+  return '已截止'
 }
 </script>
 
@@ -191,6 +206,16 @@ const getActivityTypeName = (typeId) => {
 .tag.participants {
   background: #f6ffed;
   color: #67c23a;
+}
+
+.tag.enrolling {
+  background: #f6ffed;
+  color: #67c23a;
+}
+
+.tag.enrolled {
+  background: #f5f5f5;
+  color: #909399;
 }
 
 .pagination {

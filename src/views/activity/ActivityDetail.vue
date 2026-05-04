@@ -23,18 +23,26 @@
             <span class="value">{{ getActivityTypeName(activity.typeId) }}</span>
           </div>
           <div class="info-item">
-            <span class="label">报名人数</span>
-            <span class="value">{{ activity.participants }} 人</span>
+            <span class="label">活动时间</span>
+            <span class="value">{{ activity.actTime }}</span>
+          </div>
+                    <div class="info-item">
+            <span class="label">活动地点</span>
+            <span class="value">{{ activity.address }}</span>
           </div>
           <div class="info-item">
-            <span class="label">报名截止</span>
-            <span class="value">{{ activity.signupEndTime }}</span>
+            <span class="label">报名截止时间</span>
+            <span class="value">{{ activity.enrollDeadline }}</span>
           </div>
           <div class="info-item">
             <span class="label">活动状态</span>
-            <span :class="['value', activity.status === 1 ? 'active' : 'inactive']">
-              {{ activity.status === 1 ? '进行中' : '已结束' }}
+            <span :class="['value', getActivityStatusText === '进行中' ? 'active' : 'inactive']">
+              {{ getActivityStatusText }}
             </span>
+          </div>
+          <div class="info-item">
+            <span class="label">活动开始时间</span>
+            <span class="value">{{ getActTime || '无数据' }}</span>
           </div>
         </div>
         
@@ -44,27 +52,48 @@
         </div>
         
         <div class="action-bar">
-          <el-button 
-            v-if="!hasEnrolled && activity.status === 1" 
-            type="primary" 
+          <el-button
+            v-if="enrollStatus === 'none' && getActivityStatusText === '待开展'"
+            type="primary"
             @click="handleEnroll"
             class="enroll-btn"
           >
             立即报名
           </el-button>
-          <el-button 
-            v-else-if="hasEnrolled" 
-            type="success" 
+          <el-button
+            v-else-if="enrollStatus === 'pending'"
+            type="warning"
+            disabled
+          >
+            报名申请待审核
+          </el-button>
+          <el-button
+            v-else-if="enrollStatus === 'approved'"
+            type="success"
             disabled
           >
             已报名
           </el-button>
-          <el-button 
-            v-else 
-            type="default" 
+          <el-button
+            v-else-if="enrollStatus === 'rejected'"
+            type="danger"
             disabled
           >
-            活动已结束
+            报名被拒绝
+          </el-button>
+          <el-button
+            v-else-if="getActivityStatusText === '进行中'"
+            type="default"
+            disabled
+          >
+            活动中
+          </el-button>
+          <el-button
+            v-else
+            type="default"
+            disabled
+          >
+            已结束
           </el-button>
         </div>
       </div>
@@ -73,17 +102,48 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
-import { getActivityDetail, enrollActivity } from '@/api/index'
+import { getActivityInfo, signActivity, checkEnrollStatus as checkEnrollStatusApi } from '@/api/index'
 import { useUserStore } from '@/stores/user'
 import { formatImageUrl } from '@/utils/imageUtils'
 
 const userStore = useUserStore()
 const activity = ref({})
-const hasEnrolled = ref(false)
+const enrollStatus = ref('none')
+
+const isActivityActive = computed(() => {
+  const actTime = getActTime.value
+  if (!actTime) {
+    return false
+  }
+  const actTimeDate = new Date(actTime)
+  const now = new Date()
+  return now >= actTimeDate
+})
+
+const getActTime = computed(() => {
+  return activity.value.actTime || activity.value.act_time || null
+})
+
+const getActivityStatusText = computed(() => {
+  const actTime = getActTime.value
+  if (!actTime) {
+    return '未知'
+  }
+  const actTimeDate = new Date(actTime)
+  const now = new Date()
+  if (now < actTimeDate) {
+    return '待开展'
+  }
+  const twoHoursAfter = new Date(actTimeDate.getTime() + 2 * 60 * 60 * 1000)
+  if (now < twoHoursAfter) {
+    return '进行中'
+  }
+  return '已结束'
+})
 
 onMounted(async () => {
   const id = window.location.pathname.split('/').pop()
@@ -92,16 +152,34 @@ onMounted(async () => {
 
 const loadActivity = async (id) => {
   try {
-    const res = await getActivityDetail(id)
+    const res = await getActivityInfo(id)
     activity.value = res.data || {}
-    checkEnrollStatus()
+    await checkEnrollStatus(id)
   } catch (error) {
     console.error('加载活动详情失败:', error)
   }
 }
 
-const checkEnrollStatus = () => {
-  hasEnrolled.value = false
+const checkEnrollStatus = async (actId) => {
+  if (!userStore.isLoggedIn) {
+    enrollStatus.value = 'none'
+    return
+  }
+  try {
+    const res = await checkEnrollStatusApi(actId)
+    const records = res.data?.records || []
+    if (records.length > 0) {
+      const status = records[0].auditStatus
+      if (status === 0) enrollStatus.value = 'pending'
+      else if (status === 1) enrollStatus.value = 'approved'
+      else if (status === 2) enrollStatus.value = 'rejected'
+      else enrollStatus.value = 'none'
+    } else {
+      enrollStatus.value = 'none'
+    }
+  } catch (error) {
+    enrollStatus.value = 'none'
+  }
 }
 
 const handleEnroll = async () => {
@@ -110,11 +188,11 @@ const handleEnroll = async () => {
     window.location.href = '/login'
     return
   }
-  
+
   try {
-    await enrollActivity({ activityId: activity.value.id })
-    ElMessage.success('报名成功')
-    hasEnrolled.value = true
+    await signActivity({ actId: activity.value.id })
+    ElMessage.success('报名成功，请等待审核')
+    enrollStatus.value = 'pending'
   } catch (error) {
     ElMessage.error(error.message || '报名失败')
   }

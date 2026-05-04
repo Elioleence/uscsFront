@@ -5,89 +5,58 @@
 
     <div class="content">
       <div class="club-header">
-        <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
+        <img :src="formatImageUrl(club.cover)" alt="社团logo" class="club-logo">
         <div class="club-title-section">
-          <h1>{{ club.name }}</h1>
-          <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
+          <h1>{{ club.clubName }}</h1>
+          <p class="club-type">{{ getClubTypeName(club.typeId) }}类</p>
         </div>
       </div>
       
       <div class="club-body">
+        <!-- {{ club }} -->
         <div class="club-info">
           <h2>社团简介</h2>
-          <p>{{ club.description }}</p>
+          <p>{{ club.intro }}</p>
           
           <div class="stats-grid">
+                        <div class="stat-item">
+              <span class="stat-value">{{ club.leaderName }}</span>
+              <span class="stat-label">社团负责人</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-value">{{ club.contact }}</span>
+              <span class="stat-label">联系电话</span>
+            </div>
             <div class="stat-item">
               <span class="stat-value">{{ club.memberCount }}</span>
               <span class="stat-label">成员数</span>
             </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ club.activityCount }}</span>
-              <span class="stat-label">活动数</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ getLeaderName(club.leaderId) }}</span>
-              <span class="stat-label">负责人</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value">{{ club.phone }}</span>
-              <span class="stat-label">联系电话</span>
-            </div>
+
+
           </div>
         </div>
         
-        <div class="club-achievements">
-          <h2>社团成就</h2>
-          <div v-if="achievements.length > 0" class="achievement-list">
-            <div 
-              v-for="achievement in achievements" 
-              :key="achievement.id" 
-              class="achievement-item"
-            >
-              <h3>{{ achievement.name }}</h3>
-              <p>{{ achievement.description }}</p>
-              <span class="achievement-time">{{ formatTime(achievement.getDate) }}</span>
-            </div>
-          </div>
-          <div v-else class="empty">
-            <p>暂无成就记录</p>
-          </div>
-        </div>
-        
-        <div class="club-activities">
-          <h2>近期活动</h2>
-          <div v-if="activities.length > 0" class="activity-list">
-            <div 
-              v-for="activity in activities" 
-              :key="activity.id" 
-              class="activity-item"
-              @click="goActivity(activity.id)"
-            >
-              <img :src="formatImageUrl(activity.cover)" alt="活动封面">
-              <div class="activity-info">
-                <h3>{{ activity.title }}</h3>
-                <p>{{ activity.time }}</p>
-              </div>
-            </div>
-          </div>
-          <div v-else class="empty">
-            <p>暂无活动记录</p>
-          </div>
-        </div>
+
         
         <div class="action-bar">
-          <el-button 
-            v-if="!hasJoined" 
-            type="primary" 
-            @click="handleJoin"
+          <el-button
+            v-if="joinStatus === 'none'"
+            type="primary"
+            @click="showJoinDialog"
             class="join-btn"
           >
             加入社团
           </el-button>
-          <el-button 
-            v-else 
-            type="success" 
+          <el-button
+            v-else-if="joinStatus === 'pending'"
+            type="warning"
+            disabled
+          >
+            加入申请待审核
+          </el-button>
+          <el-button
+            v-else
+            type="success"
             disabled
           >
             已加入
@@ -95,6 +64,23 @@
         </div>
       </div>
     </div>
+
+    <el-dialog v-model="joinDialogVisible" title="申请加入社团" width="500px">
+      <el-form>
+        <el-form-item label="申请理由">
+          <el-input
+            v-model="joinReason"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入申请理由..."
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="joinDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="handleJoin">提交申请</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -103,7 +89,7 @@ import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
-import { getClubDetail, applyClub } from '@/api/index'
+import { getClubInfo, submitClubApply, checkClubApplyStatus } from '@/api/index'
 import { getClubTypeName } from '@/utils/clubUtils'
 import { getUserNameById } from '@/utils/userUtils'
 import { useUserStore } from '@/stores/user'
@@ -113,7 +99,9 @@ const userStore = useUserStore()
 const club = ref({})
 const achievements = ref([])
 const activities = ref([])
-const hasJoined = ref(false)
+const joinStatus = ref('none')
+const joinDialogVisible = ref(false)
+const joinReason = ref('')
 
 onMounted(async () => {
   const id = window.location.pathname.split('/').pop()
@@ -122,18 +110,37 @@ onMounted(async () => {
 
 const loadClub = async (id) => {
   try {
-    const res = await getClubDetail(id)
+    const res = await getClubInfo(id)
     club.value = res.data || {}
     achievements.value = res.data.achievements || []
     activities.value = res.data.activities || []
-    checkJoinStatus()
+    await checkJoinStatus(id)
   } catch (error) {
     console.error('加载社团详情失败:', error)
   }
 }
 
-const checkJoinStatus = () => {
-  hasJoined.value = false
+const checkJoinStatus = async (clubId) => {
+  if (!userStore.isLoggedIn) {
+    joinStatus.value = 'none'
+    return
+  }
+  try {
+    const res = await checkClubApplyStatus(clubId)
+    joinStatus.value = res.data.status || 'none'
+  } catch (error) {
+    joinStatus.value = 'none'
+  }
+}
+
+const showJoinDialog = () => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    window.location.href = '/login'
+    return
+  }
+  joinReason.value = ''
+  joinDialogVisible.value = true
 }
 
 const handleJoin = async () => {
@@ -142,11 +149,12 @@ const handleJoin = async () => {
     window.location.href = '/login'
     return
   }
-  
+
   try {
-    await applyClub({ clubId: club.value.id })
-    ElMessage.success('申请成功，请等待审核')
-    hasJoined.value = true
+    await submitClubApply({ clubId: club.value.id, reason: joinReason.value })
+    ElMessage.success('申请已提交，请等待审核')
+    joinDialogVisible.value = false
+    joinStatus.value = 'pending'
   } catch (error) {
     ElMessage.error(error.message || '申请失败')
   }

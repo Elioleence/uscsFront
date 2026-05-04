@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
+import { ElMessage } from 'element-plus'
 
 const routes = [
   {
@@ -53,7 +55,8 @@ const routes = [
   {
     path: '/user/center',
     name: 'UserCenter',
-    component: () => import('@/views/user/UserCenter.vue')
+    component: () => import('@/views/user/UserCenter.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/notice/list',
@@ -79,6 +82,17 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(),
   routes
+})
+
+router.beforeEach((to, from, next) => {
+  const userStore = useUserStore()
+
+  if (to.meta.requiresAuth && !userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    next('/login')
+  } else {
+    next()
+  }
 })
 
 export default router

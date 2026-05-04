@@ -6,33 +6,9 @@
 
     <div class="content">
       <div class="section">
-        <h2>热门活动</h2>
-        <div class="activity-list">
-          <div 
-            v-for="activity in activities" 
-            :key="activity.id" 
-            class="activity-card"
-            @click="goActivity(activity.id)"
-          >
-            <img :src="formatImageUrl(activity.cover)" alt="活动封面" class="activity-cover">
-            <div class="activity-info">
-              <h3>{{ activity.title }}</h3>
-              <p class="activity-time">{{ activity.time }}</p>
-              <p class="activity-club">{{ activity.clubName }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <div class="section">
         <h2>推荐社团</h2>
         <div class="club-list">
-          <div 
-            v-for="club in clubs" 
-            :key="club.id" 
-            class="club-card"
-            @click="goClub(club.id)"
-          >
+          <div v-for="club in clubs" :key="club.id" class="club-card" @click="goClub(club.id)">
             <img :src="formatImageUrl(club.cover)" alt="社团logo" class="club-logo">
             <div class="club-info">
               <h3>{{ club.clubName }}</h3>
@@ -42,16 +18,26 @@
           </div>
         </div>
       </div>
-      
+      <div class="section">
+        <h2>热门活动</h2>
+        <div class="activity-list">
+          <div v-for="activity in activities" :key="activity.id" class="activity-card" @click="goActivity(activity.id)">
+            <img :src="formatImageUrl(activity.cover)" alt="活动封面" class="activity-cover">
+            <div class="activity-info">
+              <h3>{{ activity.title }}</h3>
+              <p class="activity-time">{{ activity.time }}</p>
+              <p class="activity-club">{{ activity.clubName }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+
       <div class="section">
         <h2>最新公告</h2>
         <div class="notice-list">
-          <div 
-            v-for="notice in notices" 
-            :key="notice.id" 
-            class="notice-item"
-            @click="goNotice()"
-          >
+          <div v-for="notice in notices" :key="notice.id" class="notice-item" @click="goNotice()">
             <span class="notice-title">{{ notice.title }}</span>
             <span class="notice-time">{{ formatTime(notice.createTime) }}</span>
           </div>
@@ -78,10 +64,10 @@ onMounted(async () => {
   try {
     const activityRes = await getActivityList({ pageNum: 1, pageSize: 6 })
     activities.value = activityRes.data.records || []
-    
+
     const clubRes = await getClubList({ pageNum: 1, pageSize: 6 })
     clubs.value = clubRes.data.records || []
-    
+
     const noticeRes = await getNoticeList({ pageNum: 1, pageSize: 5 })
     notices.value = noticeRes.data.records || []
   } catch (error) {
@@ -126,7 +112,7 @@ const formatTime = (time) => {
   margin-bottom: 20px;
   padding: 20px;
   border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .section h2 {
@@ -149,12 +135,12 @@ const formatTime = (time) => {
   border-radius: 8px;
   overflow: hidden;
   background: white;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .activity-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
 .activity-cover {

@@ -39,5 +39,11 @@ export function getActivitySignList(params) {
 }
 
 export function signActivity(data) {
-  return request.post('/activitySign/sign', data)
+  return request.post('/activityEnroll/submit', data)
+}
+
+export function checkEnrollStatus(actId) {
+  return request.get('/activityEnroll/myEnrolls', {
+    params: { actId, pageNum: 1, pageSize: 1 }
+  })
 }
