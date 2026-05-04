@@ -39,7 +39,7 @@
             </div>
           </div>
           <div class="forum-image" v-if="post.cover">
-            <img :src="post.cover" alt="封面">
+            <img :src="formatImageUrl(post.cover)" alt="封面">
           </div>
         </div>
       </div>
@@ -63,6 +63,7 @@ import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getForumList } from '@/api/index'
 import { getUserNameById } from '@/utils/userUtils'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const keyword = ref('')
 const posts = ref([])

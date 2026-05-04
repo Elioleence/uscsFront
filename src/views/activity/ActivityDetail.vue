@@ -5,7 +5,7 @@
 
     <div class="content">
       <div class="activity-header">
-        <img :src="activity.cover" alt="活动封面" class="activity-banner">
+        <img :src="formatImageUrl(activity.cover)" alt="活动封面" class="activity-banner">
         <div class="activity-title-section">
           <h1>{{ activity.title }}</h1>
           <div class="activity-meta">
@@ -79,6 +79,7 @@ import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getActivityDetail, enrollActivity } from '@/api/index'
 import { useUserStore } from '@/stores/user'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const userStore = useUserStore()
 const activity = ref({})

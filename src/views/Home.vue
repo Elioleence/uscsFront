@@ -14,7 +14,7 @@
             class="activity-card"
             @click="goActivity(activity.id)"
           >
-            <img :src="activity.cover" alt="活动封面" class="activity-cover">
+            <img :src="formatImageUrl(activity.cover)" alt="活动封面" class="activity-cover">
             <div class="activity-info">
               <h3>{{ activity.title }}</h3>
               <p class="activity-time">{{ activity.time }}</p>
@@ -33,7 +33,7 @@
             class="club-card"
             @click="goClub(club.id)"
           >
-            <img :src="club.logo" alt="社团logo" class="club-logo">
+            <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
             <div class="club-info">
               <h3>{{ club.name }}</h3>
               <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
@@ -68,6 +68,7 @@ import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import SwiperComponent from '@/components/swiper/swiper.vue'
 import { getActivityList, getClubList, getNoticeList } from '@/api/index'
 import { getClubTypeName } from '@/utils/clubUtils'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const activities = ref([])
 const clubs = ref([])

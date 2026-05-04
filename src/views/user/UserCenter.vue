@@ -5,7 +5,7 @@
 
     <div class="content">
       <div class="user-profile">
-        <img :src="userInfo.avatar" alt="头像" class="avatar">
+        <img :src="avatarUrl" alt="头像" class="avatar" @error="handleAvatarError">
         <div class="profile-info">
           <h2>{{ userInfo.realName }}</h2>
           <p class="username">{{ userInfo.username }}</p>
@@ -19,13 +19,13 @@
         <el-tabs v-model="activeTab" @tab-change="handleTabChange">
           <el-tab-pane label="我的活动" name="activities">
             <div v-if="activities.length > 0" class="activity-list">
-              <div 
-                v-for="activity in activities" 
-                :key="activity.id" 
+              <div
+                v-for="activity in activities"
+                :key="activity.id"
                 class="activity-item"
                 @click="goActivity(activity.id)"
               >
-                <img :src="activity.cover" alt="活动封面">
+                <img :src="formatImageUrl(activity.cover)" alt="活动封面">
                 <div class="activity-info">
                   <h3>{{ activity.title }}</h3>
                   <p>{{ activity.time }}</p>
@@ -42,13 +42,13 @@
           
           <el-tab-pane label="我的社团" name="clubs">
             <div v-if="clubs.length > 0" class="club-list">
-              <div 
-                v-for="club in clubs" 
-                :key="club.id" 
+              <div
+                v-for="club in clubs"
+                :key="club.id"
                 class="club-item"
                 @click="goClub(club.id)"
               >
-                <img :src="club.logo" alt="社团logo">
+                <img :src="formatImageUrl(club.logo)" alt="社团logo">
                 <div class="club-info">
                   <h3>{{ club.name }}</h3>
                   <p>{{ getClubTypeName(club.typeId) }}</p>
@@ -82,12 +82,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { useUserStore } from '@/stores/user'
 import { getClubTypeName } from '@/utils/clubUtils'
+import { formatAvatarUrl, formatImageUrl } from '@/utils/imageUtils'
 
 const userStore = useUserStore()
 const activeTab = ref('activities')
@@ -95,6 +96,14 @@ const userInfo = ref({})
 const activities = ref([])
 const clubs = ref([])
 const favorites = ref([])
+
+const avatarUrl = computed(() => {
+  return formatAvatarUrl(userInfo.value.avatar)
+})
+
+const handleAvatarError = (event) => {
+  event.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+}
 
 onMounted(async () => {
   if (!userStore.isLoggedIn) {

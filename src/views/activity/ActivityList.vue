@@ -24,7 +24,7 @@
           class="activity-card"
           @click="goDetail(activity.id)"
         >
-          <img :src="activity.cover" alt="活动封面" class="activity-cover">
+          <img :src="formatImageUrl(activity.cover)" alt="活动封面" class="activity-cover">
           <div class="activity-info">
             <h3>{{ activity.title }}</h3>
             <p class="activity-time">{{ activity.time }}</p>
@@ -55,6 +55,7 @@ import { ref, onMounted } from 'vue'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getActivityList } from '@/api/index'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const keyword = ref('')
 const activities = ref([])

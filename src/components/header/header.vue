@@ -9,8 +9,9 @@
     <template v-if="userStore.isLoggedIn">
       <img
         class="avatar"
-        :src="userStore.userInfo?.avatar || defaultAvatar"
+        :src="avatarUrl"
         alt="头像"
+        @error="handleAvatarError"
       />
       <span class="username">{{ userStore.userInfo?.realName || userStore.userInfo?.username }}</span>
       <router-link to="/user/center" class="center">个人中心</router-link>
@@ -29,13 +30,18 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
+import { formatAvatarUrl } from '@/utils/imageUtils'
 
 const router = useRouter()
 const userStore = useUserStore()
 
-const defaultAvatar = computed(() => {
-  return 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+const avatarUrl = computed(() => {
+  return formatAvatarUrl(userStore.userInfo?.avatar)
 })
+
+const handleAvatarError = (event) => {
+  event.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+}
 
 const handleLogout = () => {
   userStore.logout()

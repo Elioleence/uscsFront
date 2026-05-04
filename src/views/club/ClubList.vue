@@ -34,7 +34,7 @@
           class="club-card"
           @click="goDetail(club.id)"
         >
-          <img :src="club.logo" alt="社团logo" class="club-logo">
+          <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
           <div class="club-info">
             <h3>{{ club.name }}</h3>
             <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
@@ -67,6 +67,7 @@ import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getClubList } from '@/api/index'
 import { getClubTypeName, getClubTypeOptions } from '@/utils/clubUtils'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const keyword = ref('')
 const typeId = ref(0)

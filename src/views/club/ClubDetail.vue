@@ -5,7 +5,7 @@
 
     <div class="content">
       <div class="club-header">
-        <img :src="club.logo" alt="社团logo" class="club-logo">
+        <img :src="formatImageUrl(club.logo)" alt="社团logo" class="club-logo">
         <div class="club-title-section">
           <h1>{{ club.name }}</h1>
           <p class="club-type">{{ getClubTypeName(club.typeId) }}</p>
@@ -64,7 +64,7 @@
               class="activity-item"
               @click="goActivity(activity.id)"
             >
-              <img :src="activity.cover" alt="活动封面">
+              <img :src="formatImageUrl(activity.cover)" alt="活动封面">
               <div class="activity-info">
                 <h3>{{ activity.title }}</h3>
                 <p>{{ activity.time }}</p>
@@ -107,6 +107,7 @@ import { getClubDetail, applyClub } from '@/api/index'
 import { getClubTypeName } from '@/utils/clubUtils'
 import { getUserNameById } from '@/utils/userUtils'
 import { useUserStore } from '@/stores/user'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const userStore = useUserStore()
 const club = ref({})
