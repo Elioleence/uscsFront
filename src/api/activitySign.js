@@ -38,3 +38,11 @@ export function getActivitySignCount(actId) {
     method: 'get'
   })
 }
+
+// 5. 获取当前用户在某个活动的签到记录
+export function getMySignByActId(actId) {
+  return request({
+    url: `/activitySign/mySign/${actId}`,
+    method: 'get'
+  })
+}

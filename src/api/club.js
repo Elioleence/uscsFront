@@ -66,3 +66,11 @@ export function deleteAchievement(id) {
 export function getAchievementDetail(id) {
   return request.get(`/clubAchievement/public/${id}`)
 }
+
+export function getMyApplies(params) {
+  return request.get('/clubApply/myApplies', { params })
+}
+
+export function cancelApply(id) {
+  return request.delete(`/clubApply/cancel/${id}`)
+}

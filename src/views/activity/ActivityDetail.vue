@@ -20,11 +20,15 @@
         <div class="activity-info">
           <div class="info-item">
             <span class="label">活动类型</span>
-            <span class="value">{{ getActivityTypeName(activity.typeId) }}</span>
+            <span class="value">{{ activity.typeName || '未分类' }}</span>
           </div>
           <div class="info-item">
             <span class="label">活动时间</span>
-            <span class="value">{{ activity.actTime }}</span>
+            <span class="value">{{ activity.actTime || activity.act_time }}</span>
+          </div>
+          <div class="info-item">
+            <span class="label">活动结束时间</span>
+            <span class="value">{{ activity.actEndTime || activity.act_end_time || '未设置' }}</span>
           </div>
                     <div class="info-item">
             <span class="label">活动地点</span>
@@ -96,8 +100,75 @@
             已结束
           </el-button>
         </div>
+
+        <div v-if="signInfo" class="sign-info-section">
+          <h2>我的签到信息</h2>
+          <div class="sign-info-card">
+            <div class="sign-info-row">
+              <span class="sign-label">签到时间：</span>
+              <span class="sign-value">{{ formatTime(signInfo.checkinTime) }}</span>
+            </div>
+            <div class="sign-info-row">
+              <span class="sign-label">签到地址：</span>
+              <span class="sign-value">{{ signInfo.location }}</span>
+            </div>
+            <div v-if="signInfo.signImg" class="sign-info-row">
+              <span class="sign-label">签到图片：</span>
+              <img :src="formatImageUrl(signInfo.signImg)" class="sign-img" />
+            </div>
+            <div v-if="signInfo.signInfo" class="sign-info-row">
+              <span class="sign-label">签到说明：</span>
+              <span class="sign-value">{{ signInfo.signInfo }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div v-if="enrollStatus === 'approved' && !signInfo && isActivityInProgress" class="sign-action-section">
+          <el-button type="success" @click="openCheckinDialog">
+            立即签到
+          </el-button>
+        </div>
+
+        <div v-if="enrollStatus === 'approved' && !signInfo && !isActivityInProgress" class="sign-action-section">
+          <el-tag type="info">
+            {{ getActivityStatusText === '待开展' ? '活动未开始' : '活动已结束' }}
+          </el-tag>
+        </div>
       </div>
     </div>
+
+    <el-dialog
+      v-model="checkinDialogVisible"
+      title="活动签到"
+      width="500px"
+      :close-on-click-modal="false"
+    >
+      <el-form :model="checkinForm" label-width="100px">
+        <el-form-item label="签到地址" required>
+          <el-input 
+            v-model="checkinForm.location" 
+            placeholder="请输入签到地址"
+          />
+        </el-form-item>
+        <el-form-item label="签到图片">
+          <UploadImg v-model="checkinForm.signImg" />
+        </el-form-item>
+        <el-form-item label="签到说明">
+          <el-input
+            v-model="checkinForm.signInfo"
+            type="textarea"
+            :rows="3"
+            placeholder="请输入签到说明（选填）"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="checkinDialogVisible = false">取消</el-button>
+        <el-button type="primary" :loading="checkinLoading" @click="submitCheckin">
+          确认签到
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -106,13 +177,24 @@ import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
+import UploadImg from '@/components/common/UploadImg.vue'
 import { getActivityInfo, signActivity, checkEnrollStatus as checkEnrollStatusApi } from '@/api/index'
+import { checkIn, getMySignByActId } from '@/api/activitySign'
 import { useUserStore } from '@/stores/user'
 import { formatImageUrl } from '@/utils/imageUtils'
 
 const userStore = useUserStore()
 const activity = ref({})
 const enrollStatus = ref('none')
+const signInfo = ref(null)
+const checkinDialogVisible = ref(false)
+const checkinLoading = ref(false)
+const checkinForm = ref({
+  actId: null,
+  location: '',
+  signImg: '',
+  signInfo: ''
+})
 
 const isActivityActive = computed(() => {
   const actTime = getActTime.value
@@ -128,21 +210,54 @@ const getActTime = computed(() => {
   return activity.value.actTime || activity.value.act_time || null
 })
 
+const getActEndTime = computed(() => {
+  return activity.value.actEndTime || activity.value.act_end_time || null
+})
+
 const getActivityStatusText = computed(() => {
   const actTime = getActTime.value
+  const actEndTime = getActEndTime.value
   if (!actTime) {
     return '未知'
   }
-  const actTimeDate = new Date(actTime)
   const now = new Date()
+  const actTimeDate = new Date(actTime)
+  
   if (now < actTimeDate) {
     return '待开展'
   }
-  const twoHoursAfter = new Date(actTimeDate.getTime() + 2 * 60 * 60 * 1000)
-  if (now < twoHoursAfter) {
-    return '进行中'
+  
+  if (actEndTime) {
+    const actEndTimeDate = new Date(actEndTime)
+    if (now < actEndTimeDate) {
+      return '进行中'
+    }
+  } else {
+    const twoHoursAfter = new Date(actTimeDate.getTime() + 2 * 60 * 60 * 1000)
+    if (now < twoHoursAfter) {
+      return '进行中'
+    }
   }
   return '已结束'
+})
+
+const isActivityInProgress = computed(() => {
+  const actTime = getActTime.value
+  const actEndTime = getActEndTime.value
+  if (!actTime) return false
+  
+  const now = new Date()
+  const actTimeDate = new Date(actTime)
+  
+  if (now < actTimeDate) return false
+  
+  if (actEndTime) {
+    const actEndTimeDate = new Date(actEndTime)
+    return now < actEndTimeDate
+  } else {
+    const twoHoursAfter = new Date(actTimeDate.getTime() + 2 * 60 * 60 * 1000)
+    return now < twoHoursAfter
+  }
 })
 
 onMounted(async () => {
@@ -155,8 +270,22 @@ const loadActivity = async (id) => {
     const res = await getActivityInfo(id)
     activity.value = res.data || {}
     await checkEnrollStatus(id)
+    await loadSignInfo(id)
   } catch (error) {
     console.error('加载活动详情失败:', error)
+  }
+}
+
+const loadSignInfo = async (actId) => {
+  if (!userStore.isLoggedIn) {
+    signInfo.value = null
+    return
+  }
+  try {
+    const res = await getMySignByActId(actId)
+    signInfo.value = res.data || null
+  } catch (error) {
+    signInfo.value = null
   }
 }
 
@@ -207,6 +336,45 @@ const getActivityTypeName = (typeId) => {
     5: '其他'
   }
   return typeMap[typeId] || '未知类型'
+}
+
+const formatTime = (time) => {
+  if (!time) return ''
+  return new Date(time).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+const openCheckinDialog = () => {
+  checkinForm.value = {
+    actId: activity.value.id,
+    location: '',
+    signImg: '',
+    signInfo: ''
+  }
+  checkinDialogVisible.value = true
+}
+
+const submitCheckin = async () => {
+  if (!checkinForm.value.location) {
+    ElMessage.warning('请输入签到地址')
+    return
+  }
+  checkinLoading.value = true
+  try {
+    await checkIn(checkinForm.value)
+    ElMessage.success('签到成功')
+    checkinDialogVisible.value = false
+    await loadSignInfo(activity.value.id)
+  } catch (err) {
+    ElMessage.error(err.message || '签到失败')
+  } finally {
+    checkinLoading.value = false
+  }
 }
 </script>
 
@@ -321,5 +489,59 @@ const getActivityTypeName = (typeId) => {
   width: 200px;
   height: 44px;
   font-size: 16px;
+}
+
+.sign-info-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
+}
+
+.sign-info-section h2 {
+  margin: 0 0 20px;
+  font-size: 18px;
+  color: #303133;
+}
+
+.sign-info-card {
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: 20px;
+}
+
+.sign-info-row {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.sign-info-row:last-child {
+  margin-bottom: 0;
+}
+
+.sign-label {
+  font-size: 14px;
+  color: #909399;
+  min-width: 80px;
+}
+
+.sign-value {
+  font-size: 14px;
+  color: #303133;
+}
+
+.sign-img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-top: 5px;
+}
+
+.sign-action-section {
+  margin-top: 30px;
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid #ebeef5;
 }
 </style>

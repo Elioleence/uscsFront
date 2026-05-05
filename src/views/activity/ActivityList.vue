@@ -15,6 +15,21 @@
             <el-button @click="loadActivityList">搜索</el-button>
           </template>
         </el-input>
+        
+        <el-select
+          v-model="typeId"
+          placeholder="选择活动类型"
+          class="type-select"
+          @change="loadActivityList"
+        >
+          <el-option label="全部" :value="0" />
+          <el-option
+            v-for="option in typeOptions"
+            :key="option.id"
+            :label="option.typeName"
+            :value="option.id"
+          />
+        </el-select>
       </div>
       
       <div class="activity-grid">
@@ -30,7 +45,8 @@
             <p class="activity-time">{{ activity.time }}</p>
             <p class="activity-club">{{ activity.clubName }}</p>
             <div class="activity-tags">
-              <span class="tag">{{ getActivityTypeName(activity.typeId) }}类</span>
+              <!-- {{ activity }} -->
+              <span class="tag">{{ activity.typeName || '未分类' }}</span>
               <span :class="['tag', getEnrollStatus(activity) === '报名中' ? 'enrolling' : 'enrolled']">
                 {{ getEnrollStatus(activity) }}
               </span>
@@ -57,9 +73,12 @@ import { ref, onMounted } from 'vue'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getActivityList } from '@/api/index'
+import { getActivityTypeList } from '@/api/activityType'
 import { formatImageUrl } from '@/utils/imageUtils'
 
 const keyword = ref('')
+const typeId = ref(undefined)
+const typeOptions = ref([])
 const activities = ref([])
 const currentPage = ref(1)
 const pageSize = ref(9)
@@ -67,14 +86,25 @@ const total = ref(0)
 
 onMounted(() => {
   loadActivityList()
+  loadTypeOptions()
 })
+
+const loadTypeOptions = async () => {
+  try {
+    const res = await getActivityTypeList()
+    typeOptions.value = res.data || []
+  } catch (error) {
+    console.error('加载活动类型失败:', error)
+  }
+}
 
 const loadActivityList = async () => {
   try {
     const res = await getActivityList({
       pageNum: currentPage.value,
       pageSize: pageSize.value,
-      keyword: keyword.value
+      keyword: keyword.value,
+      typeId: typeId.value === 0 ? undefined : typeId.value
     })
     activities.value = res.data.records || []
     total.value = res.data.total || 0
@@ -113,7 +143,7 @@ const getEnrollStatus = (activity) => {
   if (now < deadlineDate) {
     return '报名中'
   }
-  return '已截止'
+  return '已结束'
 }
 </script>
 
@@ -132,10 +162,16 @@ const getEnrollStatus = (activity) => {
 
 .search-bar {
   margin-bottom: 20px;
+  display: flex;
+  gap: 10px;
 }
 
 .search-input {
   width: 400px;
+}
+
+.type-select {
+  width: 160px;
 }
 
 .activity-grid {
