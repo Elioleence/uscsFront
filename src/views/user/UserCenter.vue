@@ -139,6 +139,7 @@
       </div>
     </div>
 
+    <!-- 签到弹窗 -->
     <el-dialog
       v-model="checkinDialogVisible"
       title="活动签到"
@@ -267,7 +268,7 @@ const avatarUrl = computed(() => {
 })
 
 const handleAvatarError = (event) => {
-  event.target.src = 'https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png'
+  event.target.src = 'http://localhost:8080/api/upload/default.png'
 }
 
 onMounted(async () => {
