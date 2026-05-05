@@ -55,7 +55,7 @@ const handleLogout = () => {
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   padding: 0 calc((100% - 1200px) / 2);
   align-items: center;
-  color: rgb(204, 204, 204);
+  color: #fff;
   text-align: right;
   display: flex;
   justify-content: flex-end;
@@ -63,7 +63,7 @@ const handleLogout = () => {
   top: 0;
   border-radius: 0;
   left: 0;
-  background: #3a3a3a;
+  background: linear-gradient(90deg, #10b981 0%, #10b981 70%, #3b82f6 100%);
   width: 100%;
   font-size: 14px;
   line-height: 36px;
