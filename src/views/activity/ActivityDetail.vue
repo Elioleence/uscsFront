@@ -40,10 +40,10 @@
               {{ getActivityStatusText }}
             </span>
           </div>
-          <div class="info-item">
+          <!-- <div class="info-item">
             <span class="label">活动开始时间</span>
             <span class="value">{{ getActTime || '无数据' }}</span>
-          </div>
+          </div> -->
         </div>
         
         <div class="activity-content">

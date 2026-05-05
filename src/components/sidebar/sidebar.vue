@@ -21,12 +21,16 @@
         <span>社团列表</span>
       </el-menu-item>
 
+      <el-menu-item index="/achievement/list">
+        <span>社团成果</span>
+      </el-menu-item>
+
       <el-menu-item index="/forum/list">
-        <span>论坛</span>
+        <span>交流论坛</span>
       </el-menu-item>
 
       <el-menu-item index="/notice/list">
-        <span>公告</span>
+        <span>系统公告</span>
       </el-menu-item>
 
       <el-menu-item v-if="userStore.isLoggedIn" index="/user/center">

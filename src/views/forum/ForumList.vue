@@ -15,6 +15,7 @@
             <el-button @click="loadForumList">搜索</el-button>
           </template>
         </el-input>
+        <el-button type="primary" @click="goCreate">发布帖子</el-button>
       </div>
       
       <div class="forum-stats">
@@ -30,16 +31,17 @@
         >
           <div class="forum-content">
             <h3>{{ post.title }}</h3>
-            <p class="forum-desc">{{ post.content }}</p>
+            <p class="forum-desc">{{ stripHtml(post.content) }}</p>
             <div class="forum-meta">
-              <span class="author">{{ getUserNameById(post.authorId) }}</span>
+              <!-- {{ post }} -->
+              <span class="author">{{ post.realName || getUserNameById(post.userId) }}</span>
               <span class="time">{{ formatTime(post.createTime) }}</span>
-              <span class="views">阅读 {{ post.views }}</span>
-              <span class="replies">评论 {{ post.replyCount }}</span>
+              <!-- <span class="views">阅读 {{ post.views }}</span> -->
+              <!-- <span class="replies">评论 {{ post.replyCount }}</span> -->
             </div>
           </div>
-          <div class="forum-image" v-if="post.cover">
-            <img :src="formatImageUrl(post.cover)" alt="封面">
+          <div class="forum-image" v-if="post.img">
+            <img :src="formatImageUrl(post.img)" alt="封面">
           </div>
         </div>
       </div>
@@ -59,11 +61,14 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
-import { getForumList } from '@/api/index'
+import { getPostList } from '@/api/index'
 import { getUserNameById } from '@/utils/userUtils'
 import { formatImageUrl } from '@/utils/imageUtils'
+
+const router = useRouter()
 
 const keyword = ref('')
 const posts = ref([])
@@ -77,7 +82,7 @@ onMounted(() => {
 
 const loadForumList = async () => {
   try {
-    const res = await getForumList({
+    const res = await getPostList({
       pageNum: currentPage.value,
       pageSize: pageSize.value,
       keyword: keyword.value
@@ -96,6 +101,18 @@ const handlePageChange = (page) => {
 
 const goPost = (id) => {
   window.location.href = `/forum/post/${id}`
+}
+
+const goCreate = () => {
+  router.push('/forum/create')
+}
+
+// 去除HTML标签
+const stripHtml = (html) => {
+  if (!html) return ''
+  const div = document.createElement('div')
+  div.innerHTML = html
+  return div.textContent || div.innerText || ''
 }
 
 const formatTime = (time) => {
@@ -120,10 +137,14 @@ const formatTime = (time) => {
 
 .search-bar {
   margin-bottom: 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
 }
 
 .search-input {
-  width: 400px;
+  flex: 1;
+  max-width: 400px;
 }
 
 .forum-stats {

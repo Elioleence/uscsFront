@@ -8,7 +8,7 @@
         <img :src="avatarUrl" alt="头像" class="avatar" @error="handleAvatarError">
         <div class="profile-info">
           <h2>{{ userInfo.realName }}</h2>
-          <p class="username">{{ userInfo.username }}</p>
+          <p class="college">{{ userInfo.college }}</p>
           <p class="email">{{ userInfo.email }}</p>
           <p class="phone">{{ userInfo.phone }}</p>
         </div>
@@ -83,12 +83,15 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { useUserStore } from '@/stores/user'
 import { getClubTypeName } from '@/utils/clubUtils'
 import { formatAvatarUrl, formatImageUrl } from '@/utils/imageUtils'
+
+const router = useRouter()
 
 const userStore = useUserStore()
 const activeTab = ref('activities')
@@ -131,7 +134,7 @@ const handleTabChange = (tab) => {
 }
 
 const goEdit = () => {
-  alert('编辑资料功能开发中')
+  router.push('/user/edit')
 }
 
 const goActivity = (id) => {
@@ -163,6 +166,7 @@ const goClub = (id) => {
   background: white;
   border-radius: 8px;
   padding: 30px;
+  margin-top: 60px;
   margin-bottom: 20px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
@@ -185,7 +189,7 @@ const goClub = (id) => {
   color: #303133;
 }
 
-.username {
+.college {
   font-size: 14px;
   color: #409EFF;
   margin-bottom: 5px;

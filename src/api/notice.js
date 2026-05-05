@@ -5,7 +5,7 @@ export function getNoticeList(params) {
 }
 
 export function getNoticeDetail(noticeId) {
-  return request.get(`/sysNotice/detail/${noticeId}`)
+  return request.get(`/sysNotice/${noticeId}`)
 }
 
 export function createNotice(data) {

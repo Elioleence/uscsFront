@@ -43,6 +43,16 @@ const routes = [
     component: () => import('@/views/club/ClubDetail.vue')
   },
   {
+    path: '/achievement/list',
+    name: 'AchievementList',
+    component: () => import('@/views/achievement/AchievementList.vue')
+  },
+  {
+    path: '/achievement/detail/:id',
+    name: 'AchievementDetail',
+    component: () => import('@/views/achievement/AchievementDetail.vue')
+  },
+  {
     path: '/forum/list',
     name: 'ForumList',
     component: () => import('@/views/forum/ForumList.vue')
@@ -53,9 +63,21 @@ const routes = [
     component: () => import('@/views/forum/ForumPost.vue')
   },
   {
+    path: '/forum/create',
+    name: 'ForumCreate',
+    component: () => import('@/views/forum/ForumCreate.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
     path: '/user/center',
     name: 'UserCenter',
     component: () => import('@/views/user/UserCenter.vue'),
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/user/edit',
+    name: 'UserEdit',
+    component: () => import('@/views/user/UserEdit.vue'),
     meta: { requiresAuth: true }
   },
   {

@@ -47,6 +47,10 @@ export function getClubAchievementList(params) {
   return request.get('/clubAchievement/list', { params })
 }
 
+export function getPublicAchievementList(params) {
+  return request.get('/clubAchievement/public/list', { params })
+}
+
 export function createAchievement(data) {
   return request.post('/clubAchievement/create', data)
 }
@@ -57,4 +61,8 @@ export function updateAchievement(data) {
 
 export function deleteAchievement(id) {
   return request.delete(`/clubAchievement/delete/${id}`)
+}
+
+export function getAchievementDetail(id) {
+  return request.get(`/clubAchievement/public/${id}`)
 }

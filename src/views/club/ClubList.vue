@@ -70,7 +70,7 @@ import { getClubTypeName, getClubTypeOptions } from '@/utils/clubUtils'
 import { formatImageUrl } from '@/utils/imageUtils'
 
 const keyword = ref('')
-const typeId = ref(0)
+const typeId = ref(undefined)
 const clubs = ref([])
 const currentPage = ref(1)
 const pageSize = ref(9)
@@ -89,7 +89,7 @@ const loadClubList = async () => {
       pageSize: pageSize.value,
       keyword: keyword.value
     }
-    if (typeId.value > 0) {
+    if (typeId.value !== undefined && typeId.value > 0) {
       params.typeId = typeId.value
     }
     const res = await getClubList(params)

@@ -4,24 +4,25 @@
     <sidebar-component />
 
     <div class="content">
-      <div class="page-title">
+      <!-- <div class="page-title">
         <h1>公告列表</h1>
-      </div>
+      </div> -->
       
-      <div class="notice-list">
+      <div class="notice-grid">
         <div
           v-for="notice in notices"
           :key="notice.id"
-          class="notice-item"
+          class="notice-card"
           @click="goDetail(notice.id)"
         >
-          <div class="notice-header">
+          <img :src="formatImageUrl(notice.picture)" alt="公告封面" class="notice-cover">
+          <div class="notice-info">
             <h3>{{ notice.title }}</h3>
-            <span class="notice-time">{{ formatTime(notice.createTime) }}</span>
-          </div>
-          <p class="notice-content">{{ notice.content }}</p>
-          <div class="notice-footer">
-            <span class="publisher">{{ getUserNameById(notice.publisher) }}</span>
+            <p class="notice-introduction" v-if="notice.introduction">{{ notice.introduction }}</p>
+            <div class="notice-footer">
+              <span class="publisher">{{ notice.publisherName }}</span>
+              <span class="notice-time">{{ formatTime(notice.createTime) }}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -45,10 +46,11 @@ import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import { getNoticeList } from '@/api/index'
 import { getUserNameById } from '@/utils/userUtils'
+import { formatImageUrl } from '@/utils/imageUtils'
 
 const notices = ref([])
 const currentPage = ref(1)
-const pageSize = ref(10)
+const pageSize = ref(9)
 const total = ref(0)
 
 onMounted(() => {
@@ -91,7 +93,7 @@ const goDetail = (id) => {
 }
 
 .content {
-  max-width: 800px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 20px;
   padding-top: 106px;
@@ -103,57 +105,73 @@ const goDetail = (id) => {
   color: #303133;
 }
 
-.notice-list {
+.notice-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
   margin-bottom: 30px;
 }
 
-.notice-item {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+.notice-card {
   cursor: pointer;
-  transition: box-shadow 0.3s;
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-radius: 8px;
+  overflow: hidden;
+  background: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
-.notice-item:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+.notice-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
-.notice-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+.notice-cover {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
 }
 
-.notice-header h3 {
-  margin: 0;
-  font-size: 18px;
+.notice-info {
+  padding: 15px;
+}
+
+.notice-info h3 {
+  margin: 0 0 10px;
+  font-size: 17px;
   color: #303133;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.notice-time {
+.notice-introduction {
   font-size: 14px;
   color: #909399;
-}
-
-.notice-content {
-  font-size: 15px;
-  line-height: 1.8;
-  color: #606266;
-  margin-bottom: 15px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-bottom: 10px;
 }
 
 .notice-footer {
-  padding-top: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 10px;
   border-top: 1px solid #ebeef5;
 }
 
 .publisher {
-  font-size: 14px;
+  font-size: 13px;
   color: #409EFF;
+}
+
+.notice-time {
+  font-size: 13px;
+  color: #909399;
 }
 
 .pagination {
