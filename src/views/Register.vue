@@ -2,8 +2,7 @@
   <div class="register-page">
     <div class="register-container">
       <div class="register-header">
-        <h1>高校社团活动平台</h1>
-        <p>用户注册</p>
+        <h1>基于SpringBoot+Vue的高校社团活动平台的设计与实现前台注册</h1>
       </div>
 
       <el-form :model="registerForm" :rules="rules" ref="formRef" class="register-form">
@@ -163,19 +162,20 @@ const handleRegister = async () => {
 
 <style scoped>
 .register-page {
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
+  background: url('/img/loginBackImg.png') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .register-container {
   width: 450px;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .register-header {
@@ -185,12 +185,8 @@ const handleRegister = async () => {
 
 .register-header h1 {
   color: #303133;
-  margin-bottom: 8px;
-  font-size: 24px;
-}
-
-.register-header p {
-  color: #909399;
+  font-size: 20px;
+  line-height: 1.4;
 }
 
 .register-form {

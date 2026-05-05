@@ -2,34 +2,33 @@
   <div class="login-page">
     <div class="login-container">
       <div class="login-header">
-        <h1>高校社团活动平台</h1>
-        <!-- <p>欢迎登录</p> -->
+        <h1>基于SpringBoot+Vue的高校社团活动平台的设计与实现前台登录</h1>
       </div>
-      
+
       <el-form :model="loginForm" :rules="rules" ref="formRef" class="login-form">
         <el-form-item prop="username">
-          <el-input 
-            v-model="loginForm.username" 
+          <el-input
+            v-model="loginForm.username"
             placeholder="请输入用户名"
             prefix-icon="User"
             size="large"
           />
         </el-form-item>
-        
+
         <el-form-item prop="password">
-          <el-input 
-            v-model="loginForm.password" 
-            type="password" 
+          <el-input
+            v-model="loginForm.password"
+            type="password"
             placeholder="请输入密码"
             prefix-icon="Lock"
             size="large"
           />
         </el-form-item>
-        
+
         <el-form-item>
           <el-button type="primary" @click="handleLogin" class="login-btn" size="large">登录</el-button>
         </el-form-item>
-        
+
         <div class="login-footer">
           <span>还没有账号？</span>
           <a href="/register">立即注册</a>
@@ -79,19 +78,20 @@ const handleLogin = async () => {
 
 <style scoped>
 .login-page {
-  min-height: 100vh;
+  width: 100%;
+  height: 100vh;
+  background: url('/img/loginBackImg.png') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .login-container {
   width: 400px;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   padding: 40px;
   border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
 }
 
 .login-header {
@@ -101,12 +101,8 @@ const handleLogin = async () => {
 
 .login-header h1 {
   color: #303133;
-  margin-bottom: 8px;
-  font-size: 24px;
-}
-
-.login-header p {
-  color: #909399;
+  font-size: 20px;
+  line-height: 1.4;
 }
 
 .login-form {
