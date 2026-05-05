@@ -11,3 +11,7 @@ export function getUserInfo(userId) {
 export function getUserInfoByUsername(username) {
   return request.get('/sysUser/info', { params: { username } })
 }
+
+export function registerApi(data) {
+  return request.post('/sysUser/register', data)
+}
