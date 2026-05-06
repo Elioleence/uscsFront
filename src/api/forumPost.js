@@ -13,7 +13,16 @@ export function getPostList(params) {
   })
 }
 
-// 2. 帖子详情
+// 2. 我的帖子列表
+export function getMyPostList(params) {
+  return request({
+    url: '/forumPost/myList',
+    method: 'get',
+    params
+  })
+}
+
+// 3. 帖子详情
 export function getPostDetail(id) {
   return request({
     url: `/forumPost/${id}`,

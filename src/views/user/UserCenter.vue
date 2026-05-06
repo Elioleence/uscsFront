@@ -86,53 +86,153 @@
           </el-tab-pane>
 
           <el-tab-pane label="我的社团" name="clubs">
-            <div v-if="clubs.length > 0" class="club-list">
-              <div
-                v-for="item in clubs"
-                :key="item.id"
-                class="club-item"
-              >
-                <div class="club-left">
-                  <div class="club-title" @click="goClubDetail(item.clubId)">
-                    {{ item.clubName }}
+            <el-tabs v-model="clubSubTab" type="card">
+              <el-tab-pane label="加入申请" name="join">
+                <div v-if="joinApplications.length > 0" class="club-list">
+                  <div
+                    v-for="item in joinApplications"
+                    :key="item.id"
+                    class="club-item"
+                  >
+                    <div class="club-left">
+                      <div class="club-title" @click="goClubDetail(item.clubId)">
+                        {{ item.clubName }}
+                      </div>
+                      <div class="club-info">
+                        <span class="info-item">申请时间：{{ formatTime(item.applyTime) }}</span>
+                        <span class="info-item">
+                          审核状态：
+                          <el-tag :type="getStatusType(item.auditStatus)" size="small">
+                            {{ getAuditStatusText(item.auditStatus) }}
+                          </el-tag>
+                        </span>
+                      </div>
+                      <div v-if="item.reason" class="reason">
+                        申请理由：{{ item.reason }}
+                      </div>
+                      <div v-if="item.auditStatus === 2 && item.auditReply" class="audit-reply">
+                        拒绝理由：{{ item.auditReply }}
+                      </div>
+                    </div>
+                    <div class="club-right">
+                      <el-button
+                        v-if="item.auditStatus === 0"
+                        type="warning"
+                        size="small"
+                        @click="handleCancelApply(item.id)"
+                      >
+                        取消申请
+                      </el-button>
+                      <template v-else-if="item.auditStatus === 1">
+                        <el-button
+                          size="small"
+                          @click="goClubDetail(item.clubId)"
+                        >
+                          查看社团
+                        </el-button>
+                        <!-- <el-button
+                          type="danger"
+                          size="small"
+                          @click="handleQuitClub(item)"
+                        >
+                          退出社团
+                        </el-button> -->
+                      </template>
+                    </div>
                   </div>
-                  <div class="club-info">
-                    <span class="info-item">申请时间：{{ formatTime(item.applyTime) }}</span>
+                </div>
+                <div v-else class="empty">
+                  <p>暂无加入申请</p>
+                </div>
+              </el-tab-pane>
+              <el-tab-pane label="退出申请" name="quit">
+                <div v-if="quitApplications.length > 0" class="club-list">
+                  <div
+                    v-for="item in quitApplications"
+                    :key="item.id"
+                    class="club-item"
+                  >
+                    <div class="club-left">
+                      <div class="club-title" @click="goClubDetail(item.clubId)">
+                        {{ item.clubName }}
+                      </div>
+                      <div class="club-info">
+                        <span class="info-item">申请时间：{{ formatTime(item.applyTime) }}</span>
+                        <span class="info-item">
+                          审核状态：
+                          <el-tag :type="getStatusType(item.auditStatus)" size="small">
+                            {{ getAuditStatusText(item.auditStatus) }}
+                          </el-tag>
+                        </span>
+                      </div>
+                      <div v-if="item.reason" class="reason">
+                        退出理由：{{ item.reason }}
+                      </div>
+                      <div v-if="item.auditStatus === 2 && item.auditReply" class="audit-reply">
+                        拒绝理由：{{ item.auditReply }}
+                      </div>
+                    </div>
+                    <div class="club-right">
+                      <el-button
+                        v-if="item.auditStatus === 0"
+                        type="warning"
+                        size="small"
+                        @click="handleCancelQuit(item.id)"
+                      >
+                        取消申请
+                      </el-button>
+                    </div>
+                  </div>
+                </div>
+                <div v-else class="empty">
+                  <p>暂无退出申请</p>
+                </div>
+              </el-tab-pane>
+            </el-tabs>
+          </el-tab-pane>
+
+          <el-tab-pane label="我的帖子" name="posts">
+            <div v-if="posts.length > 0" class="post-list">
+              <div
+                v-for="item in posts"
+                :key="item.id"
+                class="post-item"
+              >
+                <div class="post-left">
+                  <div class="post-title" @click="goPostDetail(item.id)">
+                    {{ item.title }}
+                  </div>
+                  <div class="post-info">
+                    <span class="info-item">发布时间：{{ formatTime(item.createTime) }}</span>
                     <span class="info-item">
-                      审核状态：
-                      <el-tag :type="getStatusType(item.auditStatus)" size="small">
-                        {{ getAuditStatusText(item.auditStatus) }}
+                      帖子状态：
+                      <el-tag :type="getPostStatusType(item.status)" size="small">
+                        {{ getPostStatusText(item.status) }}
                       </el-tag>
                     </span>
                   </div>
-                  <div v-if="item.reason" class="reason">
-                    申请理由：{{ item.reason }}
-                  </div>
-                  <div v-if="item.auditStatus === 2 && item.auditReply" class="audit-reply">
-                    拒绝理由：{{ item.auditReply }}
+                  <div class="post-summary" v-html="getPostSummary(item.content)">
                   </div>
                 </div>
-                <div class="club-right">
+                <div class="post-right">
                   <el-button
-                    v-if="item.auditStatus === 0"
-                    type="warning"
                     size="small"
-                    @click="handleCancelApply(item.id)"
+                    @click="goPostDetail(item.id)"
                   >
-                    取消申请
+                    查看详情
                   </el-button>
                   <el-button
-                    v-else-if="item.auditStatus === 1"
+                    type="danger"
                     size="small"
-                    @click="goClubDetail(item.clubId)"
+                    @click="handleDeletePost(item)"
                   >
-                    查看社团
+                    删除
                   </el-button>
                 </div>
               </div>
             </div>
             <div v-else class="empty">
-              <p>暂无申请的社团</p>
+              <p>还没有发布任何帖子</p>
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -178,6 +278,33 @@
         </el-button>
       </template>
     </el-dialog>
+
+    <!-- 退出社团弹窗 -->
+    <el-dialog
+      v-model="quitDialogVisible"
+      title="申请退出社团"
+      width="500px"
+    >
+      <el-form :model="quitForm" label-width="100px">
+        <el-form-item label="社团名称">
+          <el-input :value="quitForm.clubName" disabled />
+        </el-form-item>
+        <el-form-item label="退出理由" required>
+          <el-input
+            v-model="quitForm.reason"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入退出理由"
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="quitDialogVisible = false">取消</el-button>
+        <el-button type="danger" :loading="quitLoading" @click="handleSubmitQuit">
+          提交申请
+        </el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -193,14 +320,19 @@ import { formatAvatarUrl } from '@/utils/imageUtils'
 import { getMyEnrolls, cancelEnroll } from '@/api/activityEnroll'
 import { getMyApplies, cancelApply } from '@/api/club'
 import { checkIn, getMySigns } from '@/api/activitySign'
+import { submitQuit as submitQuitApi, getMyQuits, cancelQuit } from '@/api/clubQuit'
+import { getMyPostList, deletePost } from '@/api/forumPost'
 
 const router = useRouter()
 const userStore = useUserStore()
 
 const activeTab = ref('activities')
+const clubSubTab = ref('join')
 const userInfo = ref({})
 const activities = ref([])
-const clubs = ref([])
+const joinApplications = ref([])
+const quitApplications = ref([])
+const posts = ref([])
 const signedActivityIds = ref(new Set())
 
 const checkinDialogVisible = ref(false)
@@ -211,6 +343,14 @@ const checkinForm = ref({
   location: '',
   signImg: '',
   signInfo: ''
+})
+
+const quitDialogVisible = ref(false)
+const quitLoading = ref(false)
+const quitForm = ref({
+  clubId: null,
+  clubName: '',
+  reason: ''
 })
 
 const isSigned = (actId) => {
@@ -287,7 +427,16 @@ const loadUserInfo = () => {
 }
 
 const loadUserData = async () => {
-  await Promise.all([loadActivities(), loadClubs()])
+  await Promise.all([loadActivities(), loadClubs(), loadPosts()])
+}
+
+const loadPosts = async () => {
+  try {
+    const res = await getMyPostList({ pageSize: 100 })
+    posts.value = res.data?.records || []
+  } catch (err) {
+    console.error('加载我的帖子失败', err)
+  }
 }
 
 const loadActivities = async () => {
@@ -301,8 +450,12 @@ const loadActivities = async () => {
 
 const loadClubs = async () => {
   try {
-    const res = await getMyApplies({ pageSize: 100 })
-    clubs.value = res.data?.records || []
+    const [joinRes, quitRes] = await Promise.all([
+      getMyApplies({ pageSize: 100 }),
+      getMyQuits({ pageSize: 100 })
+    ])
+    joinApplications.value = joinRes.data?.records || []
+    quitApplications.value = quitRes.data?.records || []
   } catch (err) {
     console.error('加载我的社团失败', err)
   }
@@ -351,6 +504,52 @@ const goActivityDetail = (actId) => {
 
 const goClubDetail = (clubId) => {
   router.push(`/club/detail/${clubId}`)
+}
+
+const goPostDetail = (postId) => {
+  router.push(`/forum/post/${postId}`)
+}
+
+const getPostStatusType = (status) => {
+  if (status === 0) return 'danger'
+  if (status === 1) return 'success'
+  if (status === 2) return 'warning'
+  return 'info'
+}
+
+const getPostStatusText = (status) => {
+  if (status === 0) return '已禁用'
+  if (status === 1) return '正常'
+  if (status === 2) return '待审核'
+  return '未知'
+}
+
+const getPostSummary = (content) => {
+  if (!content) return ''
+  // 移除HTML标签
+  const text = content.replace(/<[^>]*>/g, '')
+  // 截取前100字
+  if (text.length > 100) {
+    return text.substring(0, 100) + '...'
+  }
+  return text
+}
+
+const handleDeletePost = async (post) => {
+  try {
+    await ElMessageBox.confirm(`确定要删除帖子《${post.title}》吗？`, '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await deletePost(post.id)
+    ElMessage.success('删除成功')
+    await loadPosts()
+  } catch (err) {
+    if (err !== 'cancel') {
+      ElMessage.error(err.message || '删除失败')
+    }
+  }
 }
 
 const handleCancelEnroll = async (id) => {
@@ -420,6 +619,64 @@ const submitCheckin = async () => {
     checkinLoading.value = false
   }
 }
+
+const handleQuitClub = async (item) => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要退出该社团吗？退出后需要重新申请才能加入',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    quitForm.value = {
+      clubId: item.clubId,
+      clubName: item.clubName,
+      reason: ''
+    }
+    quitDialogVisible.value = true
+  } catch {
+    // 用户取消
+  }
+}
+
+const handleSubmitQuit = async () => {
+  if (!quitForm.value.reason) {
+    ElMessage.warning('请输入退出理由')
+    return
+  }
+  quitLoading.value = true
+  try {
+    await submitQuitApi({
+      clubId: quitForm.value.clubId,
+      reason: quitForm.value.reason
+    })
+    ElMessage.success('退社申请已提交，请等待审核')
+    quitDialogVisible.value = false
+    await loadClubs()
+  } catch (err) {
+    ElMessage.error(err.message || '提交失败')
+  } finally {
+    quitLoading.value = false
+  }
+}
+
+const handleCancelQuit = async (id) => {
+  try {
+    await ElMessageBox.confirm('确定要取消这个退社申请吗？', '提示', {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning'
+    })
+    await cancelQuit(id)
+    ElMessage.success('取消申请成功')
+    await loadClubs()
+  } catch (err) {
+    if (err !== 'cancel') ElMessage.error('操作失败')
+  }
+}
 </script>
 
 <style scoped>
@@ -484,11 +741,11 @@ const submitCheckin = async () => {
   padding: 0 20px;
 }
 
-.activity-list, .club-list {
+.activity-list, .club-list, .post-list {
   padding: 20px 0;
 }
 
-.activity-item, .club-item {
+.activity-item, .club-item, .post-item {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
@@ -499,15 +756,15 @@ const submitCheckin = async () => {
   transition: all 0.3s;
 }
 
-.activity-item:hover, .club-item:hover {
+.activity-item:hover, .club-item:hover, .post-item:hover {
   background: #f0f0f0;
 }
 
-.activity-left, .club-left {
+.activity-left, .club-left, .post-left {
   flex: 1;
 }
 
-.activity-title, .club-title {
+.activity-title, .club-title, .post-title {
   font-size: 18px;
   font-weight: bold;
   color: #303133;
@@ -515,16 +772,33 @@ const submitCheckin = async () => {
   cursor: pointer;
 }
 
-.activity-title:hover, .club-title:hover {
+.activity-title:hover, .club-title:hover, .post-title:hover {
   color: #409EFF;
 }
 
-.activity-info, .club-info {
+.activity-info, .club-info, .post-info {
   display: flex;
   gap: 20px;
   font-size: 13px;
   color: #909399;
   margin-bottom: 10px;
+}
+
+.post-summary {
+  font-size: 14px;
+  color: #606266;
+  background: #fff;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 6px;
+  line-height: 1.6;
+}
+
+.activity-right, .club-right, .post-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 100px;
 }
 
 .reason, .audit-reply {
@@ -556,7 +830,7 @@ const submitCheckin = async () => {
     text-align: center;
     gap: 15px;
   }
-  .activity-info, .club-info {
+  .activity-info, .club-info, .post-info {
     flex-direction: column;
     gap: 4px;
   }

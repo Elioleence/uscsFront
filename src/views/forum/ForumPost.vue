@@ -5,7 +5,12 @@
 
     <div class="content">
       <div class="post-header">
-        <h1>{{ post.title }}</h1>
+        <h1>{{ post.title }}
+          <span v-if="isAuthor" class="post-actions">
+            <el-button type="primary" size="small" @click="handleEdit">编辑</el-button>
+            <el-button type="danger" size="small" @click="handleDelete">删除</el-button>
+          </span>
+        </h1>
         <div class="post-meta">
           <span class="author">{{ post.realName || getUserNameById(post.userId) }}</span>
           <span class="time">{{ formatTime(post.createTime) }}</span>
@@ -67,27 +72,67 @@
         </div>
       </div>
     </div>
+
+    <!-- 编辑帖子对话框 -->
+    <el-dialog v-model="editDialogVisible" title="编辑帖子" width="600px">
+      <el-form :model="editForm" label-width="80px">
+        <el-form-item label="标题">
+          <el-input v-model="editForm.title" placeholder="请输入帖子标题" />
+        </el-form-item>
+        <el-form-item label="内容">
+          <QuillEditor
+            v-model="editForm.content"
+            placeholder="请输入帖子内容"
+            height="200px"
+          />
+        </el-form-item>
+        <el-form-item label="封面图片">
+          <UploadImg v-model="editForm.img" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="editDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitEdit" :loading="editLoading">保存</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, computed, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import QuillEditor from '@/components/common/QuillEditor.vue'
-import { getPostDetail, getReplies, createPost } from '@/api/forumPost'
+import UploadImg from '@/components/common/UploadImg.vue'
+import { getPostDetail, getReplies, createPost, updatePost, deletePost } from '@/api/forumPost'
 import { getUserNameById } from '@/utils/userUtils'
 import { formatImageUrl } from '@/utils/imageUtils'
 import { useUserStore } from '@/stores/user'
 
+const router = useRouter()
 const userStore = useUserStore()
+
 const post = ref({})
 const comments = ref([])
 const commentContent = ref('')
-const replyTargetId = ref(null) // 当前回复的评论 id
+const replyTargetId = ref(null)
 const replyContent = ref('')
-const replyPlaceholder = ref('') // 回复的 placeholder
+const replyPlaceholder = ref('')
+
+const editDialogVisible = ref(false)
+const editLoading = ref(false)
+const editForm = ref({
+  id: null,
+  title: '',
+  content: '',
+  img: ''
+})
+
+const isAuthor = computed(() => {
+  return userStore.isLoggedIn && post.value.userId === userStore.userInfo?.id
+})
 
 onMounted(async () => {
   const id = window.location.pathname.split('/').pop()
@@ -127,12 +172,12 @@ const handleComment = async () => {
   
   try {
     await createPost({
-            parentId: post.value.id,
-            content: commentContent.value
-          })
-          ElMessage.success('评论成功')
-          commentContent.value = ''
-          await loadComments(post.value.id)
+      parentId: post.value.id,
+      content: commentContent.value
+    })
+    ElMessage.success('评论成功')
+    commentContent.value = ''
+    await loadComments(post.value.id)
   } catch (error) {
     ElMessage.error(error.message || '评论失败')
   }
@@ -144,7 +189,6 @@ const formatTime = (time) => {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
 }
 
-// 切换回复输入框
 const toggleReplyInput = (comment) => {
   if (!userStore.isLoggedIn) {
     ElMessage.warning('请先登录')
@@ -152,11 +196,9 @@ const toggleReplyInput = (comment) => {
     return
   }
   if (replyTargetId.value === comment.id) {
-    // 关闭
     replyTargetId.value = null
     replyContent.value = ''
   } else {
-    // 打开
     replyTargetId.value = comment.id
     replyContent.value = ''
     const userName = comment.realName || getUserNameById(comment.userId)
@@ -164,13 +206,11 @@ const toggleReplyInput = (comment) => {
   }
 }
 
-// 取消回复
 const cancelReply = () => {
   replyTargetId.value = null
   replyContent.value = ''
 }
 
-// 发送回复
 const handleReply = async (comment) => {
   if (!replyContent.value.trim()) {
     ElMessage.warning('请输入回复内容')
@@ -187,6 +227,61 @@ const handleReply = async (comment) => {
     await loadComments(post.value.id)
   } catch (error) {
     ElMessage.error(error.message || '回复失败')
+  }
+}
+
+const handleEdit = () => {
+  editForm.value = {
+    id: post.value.id,
+    title: post.value.title,
+    content: post.value.content,
+    img: post.value.img || ''
+  }
+  editDialogVisible.value = true
+}
+
+const submitEdit = async () => {
+  if (!editForm.value.title?.trim()) {
+    ElMessage.warning('请输入帖子标题')
+    return
+  }
+  if (!editForm.value.content?.trim()) {
+    ElMessage.warning('请输入帖子内容')
+    return
+  }
+  
+  editLoading.value = true
+  try {
+    await updatePost(editForm.value)
+    ElMessage.success('修改成功')
+    editDialogVisible.value = false
+    await loadPost(post.value.id)
+  } catch (error) {
+    ElMessage.error(error.message || '修改失败')
+  } finally {
+    editLoading.value = false
+  }
+}
+
+const handleDelete = async () => {
+  try {
+    await ElMessageBox.confirm(
+      '确定要删除这篇帖子吗？删除后无法恢复！',
+      '提示',
+      {
+        confirmButtonText: '确定删除',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    
+    await deletePost(post.value.id)
+    ElMessage.success('删除成功')
+    router.push('/forum')
+  } catch (error) {
+    if (error !== 'cancel') {
+      ElMessage.error('删除失败')
+    }
   }
 }
 </script>
@@ -216,6 +311,13 @@ const handleReply = async (comment) => {
   margin: 0 0 15px;
   font-size: 24px;
   color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.post-actions {
+  font-size: 14px;
 }
 
 .post-meta {

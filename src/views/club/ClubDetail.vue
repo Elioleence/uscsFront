@@ -54,13 +54,30 @@
           >
             加入申请待审核
           </el-button>
-          <el-button
-            v-else
-            type="success"
-            disabled
-          >
-            已加入
-          </el-button>
+          <template v-else-if="joinStatus === 'joined'">
+            <el-button
+              v-if="quitStatus === 'none'"
+              type="danger"
+              @click="showQuitDialog"
+              class="quit-btn"
+            >
+              退出社团
+            </el-button>
+            <el-button
+              v-else-if="quitStatus === 'pending'"
+              type="warning"
+              disabled
+            >
+              退社申请待审核
+            </el-button>
+            <el-button
+              v-else
+              type="info"
+              disabled
+            >
+              已退出社团
+            </el-button>
+          </template>
         </div>
       </div>
     </div>
@@ -81,15 +98,32 @@
         <el-button type="primary" @click="handleJoin">提交申请</el-button>
       </template>
     </el-dialog>
+
+    <el-dialog v-model="quitDialogVisible" title="申请退出社团" width="500px">
+      <el-form>
+        <el-form-item label="退社理由">
+          <el-input
+            v-model="quitReason"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入退社理由..."
+          />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="quitDialogVisible = false">取消</el-button>
+        <el-button type="danger" @click="handleQuit">提交申请</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
-import { getClubInfo, submitClubApply, checkClubApplyStatus } from '@/api/index'
+import { getClubInfo, submitClubApply, checkClubApplyStatus, submitQuit, getMyQuits } from '@/api/index'
 import { getClubTypeName } from '@/utils/clubUtils'
 import { getUserNameById } from '@/utils/userUtils'
 import { useUserStore } from '@/stores/user'
@@ -100,8 +134,11 @@ const club = ref({})
 const achievements = ref([])
 const activities = ref([])
 const joinStatus = ref('none')
+const quitStatus = ref('none')
 const joinDialogVisible = ref(false)
+const quitDialogVisible = ref(false)
 const joinReason = ref('')
+const quitReason = ref('')
 
 onMounted(async () => {
   const id = window.location.pathname.split('/').pop()
@@ -115,6 +152,9 @@ const loadClub = async (id) => {
     achievements.value = res.data.achievements || []
     activities.value = res.data.activities || []
     await checkJoinStatus(id)
+    if (joinStatus.value === 'joined') {
+      await checkQuitStatus(id)
+    }
   } catch (error) {
     console.error('加载社团详情失败:', error)
   }
@@ -130,6 +170,31 @@ const checkJoinStatus = async (clubId) => {
     joinStatus.value = res.data.status || 'none'
   } catch (error) {
     joinStatus.value = 'none'
+  }
+}
+
+const checkQuitStatus = async (clubId) => {
+  if (!userStore.isLoggedIn) {
+    quitStatus.value = 'none'
+    return
+  }
+  try {
+    const res = await getMyQuits({ clubId, pageNum: 1, pageSize: 10 })
+    const quits = res.data.records || []
+    if (quits.length > 0) {
+      const latestQuit = quits[0]
+      if (latestQuit.auditStatus === 0) {
+        quitStatus.value = 'pending'
+      } else if (latestQuit.auditStatus === 1) {
+        quitStatus.value = 'approved'
+      } else {
+        quitStatus.value = 'none'
+      }
+    } else {
+      quitStatus.value = 'none'
+    }
+  } catch (error) {
+    quitStatus.value = 'none'
   }
 }
 
@@ -157,6 +222,41 @@ const handleJoin = async () => {
     joinStatus.value = 'pending'
   } catch (error) {
     ElMessage.error(error.message || '申请失败')
+  }
+}
+
+const showQuitDialog = async () => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning('请先登录')
+    window.location.href = '/login'
+    return
+  }
+
+  try {
+    await ElMessageBox.confirm(
+      '确定要退出该社团吗？退出后需要重新申请加入',
+      '提示',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }
+    )
+    quitReason.value = ''
+    quitDialogVisible.value = true
+  } catch {
+    // 用户取消
+  }
+}
+
+const handleQuit = async () => {
+  try {
+    await submitQuit({ clubId: club.value.id, reason: quitReason.value })
+    ElMessage.success('退社申请已提交，请等待审核')
+    quitDialogVisible.value = false
+    quitStatus.value = 'pending'
+  } catch (error) {
+    ElMessage.error(error.message || '提交失败')
   }
 }
 
@@ -353,6 +453,12 @@ const goActivity = (id) => {
 }
 
 .join-btn {
+  width: 200px;
+  height: 44px;
+  font-size: 16px;
+}
+
+.quit-btn {
   width: 200px;
   height: 44px;
   font-size: 16px;
