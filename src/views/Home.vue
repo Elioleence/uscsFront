@@ -86,7 +86,7 @@ const goClub = (id) => {
 const goNotice = () => {
   window.location.href = '/notice/list'
 }
-
+// 格式化时间
 const formatTime = (time) => {
   if (!time) return ''
   const date = new Date(time)

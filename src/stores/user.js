@@ -27,6 +27,7 @@ export const useUserStore = defineStore('user', {
       return res
     },
 
+    // 拉取最新用户信息
     async fetchUserInfo() {
       if (!this.userInfo?.id) return
       const res = await getUserInfo(this.userInfo.id)

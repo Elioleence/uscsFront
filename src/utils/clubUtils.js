@@ -1,59 +1,71 @@
-/**
- * 社团类型工具函数
- */
+import { getClubTypeList } from '@/api/clubType'
 
-// 社团类型ID映射
-const clubTypeIdMap = new Map([
-  [1, '学术科技'],
-  [2, '文化艺术'],
-  [3, '体育健身'],
-  [4, '志愿服务'],
-  [5, '其他']
-])
+let clubTypeCache = null
+let clubTypeTagTypeCache = null
 
-// 社团类型标签类型映射
-const clubTypeTagTypeMap = new Map([
-  [1, 'primary'],
-  [2, 'success'],
-  [3, 'warning'],
-  [4, 'info'],
-  [5, 'danger']
-])
+const defaultClubTypes = [
+  { id: 1, typeName: '学术科技', tagType: 'primary' },
+  { id: 2, typeName: '文化艺术', tagType: 'success' },
+  { id: 3, typeName: '体育健身', tagType: 'warning' },
+  { id: 4, typeName: '志愿服务', tagType: 'info' },
+  { id: 5, typeName: '其他', tagType: 'danger' }
+]
 
-/**
- * 获取社团类型的显示名称
- * @param {number} typeId - 社团类型ID
- * @returns {string} 显示名称
- */
-export const getClubTypeName = (typeId) => {
-  return clubTypeIdMap.get(typeId) || '未知类型'
+// 获取社团类型数据
+export const loadClubTypes = async () => {
+  try {
+    const res = await getClubTypeList()
+    if (res.code === 200 && res.data && res.data.length > 0) {
+      clubTypeCache = new Map(res.data.map(item => [item.id, item.typeName]))
+      clubTypeTagTypeCache = new Map(res.data.map(item => [item.id, getDefaultTagType(item.id)]))
+    } else {
+      initDefaultCache()
+    }
+  } catch (error) {
+    initDefaultCache()
+  }
 }
 
-/**
- * 获取社团类型的样式类名
- * @param {number} typeId - 社团类型ID
- * @returns {string} 样式类名
- */
+const initDefaultCache = () => {
+  clubTypeCache = new Map(defaultClubTypes.map(item => [item.id, item.typeName]))
+  clubTypeTagTypeCache = new Map(defaultClubTypes.map(item => [item.id, item.tagType]))
+}
+
+const getDefaultTagType = (typeId) => {
+  const item = defaultClubTypes.find(t => t.id === typeId)
+  return item ? item.tagType : 'info'
+}
+
+// 映射社团类型ID为名称
 export const getClubTypeClass = (typeId) => {
-  const typeName = clubTypeIdMap.get(typeId)
+export const getClubTypeName = (typeId) => {
+  if (!clubTypeCache) {
+    const item = defaultClubTypes.find(t => t.id === typeId)
+    return item ? item.typeName : '未知类型'
+  }
+  return clubTypeCache.get(typeId) || '未知类型'
+}
+
+export const getClubTypeClass = (typeId) => {
+  const typeName = getClubTypeName(typeId)
   return typeName ? typeName.toLowerCase().replace(/\s+/g, '-') : 'other'
 }
 
-/**
- * 获取社团类型的标签类型
- * @param {number} typeId - 社团类型ID
- * @returns {string} 标签类型
- */
 export const getClubTypeTagType = (typeId) => {
-  return clubTypeTagTypeMap.get(typeId) || 'info'
+  if (!clubTypeTagTypeCache) {
+    return getDefaultTagType(typeId)
+  }
+  return clubTypeTagTypeCache.get(typeId) || 'info'
 }
 
-/**
- * 获取所有社团类型选项
- * @returns {Array} 社团类型选项数组
- */
 export const getClubTypeOptions = () => {
-  return Array.from(clubTypeIdMap.entries()).map(([value, label]) => ({
+  if (!clubTypeCache) {
+    return defaultClubTypes.map(item => ({
+      label: item.typeName,
+      value: item.id
+    }))
+  }
+  return Array.from(clubTypeCache.entries()).map(([value, label]) => ({
     label,
     value
   }))
