@@ -20,6 +20,7 @@
         <div class="activity-info">
           <div class="info-item">
             <span class="label">活动类型</span>
+            <!-- {{ activity}} -->
             <span class="value">{{ activity.typeName || '未分类' }}</span>
           </div>
           <div class="info-item">
