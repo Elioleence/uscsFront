@@ -129,7 +129,7 @@ const editForm = ref({
   content: '',
   img: ''
 })
-
+// 判断是否为帖子作者
 const isAuthor = computed(() => {
   return userStore.isLoggedIn && post.value.userId === userStore.userInfo?.id
 })

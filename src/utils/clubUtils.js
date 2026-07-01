@@ -1,4 +1,4 @@
-import { getClubTypeList } from '@/api/clubType'
+import { getTypeList } from '@/api/clubType'
 
 let clubTypeCache = null
 let clubTypeTagTypeCache = null
@@ -14,7 +14,7 @@ const defaultClubTypes = [
 // 获取社团类型数据
 export const loadClubTypes = async () => {
   try {
-    const res = await getClubTypeList()
+    const res = await getTypeList()
     if (res.code === 200 && res.data && res.data.length > 0) {
       clubTypeCache = new Map(res.data.map(item => [item.id, item.typeName]))
       clubTypeTagTypeCache = new Map(res.data.map(item => [item.id, getDefaultTagType(item.id)]))
@@ -37,7 +37,6 @@ const getDefaultTagType = (typeId) => {
 }
 
 // 映射社团类型ID为名称
-export const getClubTypeClass = (typeId) => {
 export const getClubTypeName = (typeId) => {
   if (!clubTypeCache) {
     const item = defaultClubTypes.find(t => t.id === typeId)

@@ -143,7 +143,7 @@ const getEnrollStatus = (activity) => {
   if (now < deadlineDate) {
     return '报名中'
   }
-  return '已结束'
+  return '活动报名已结束'
 }
 </script>
 
