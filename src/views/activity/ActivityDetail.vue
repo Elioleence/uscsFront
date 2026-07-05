@@ -175,6 +175,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
@@ -184,6 +185,7 @@ import { checkIn, getMySignByActId } from '@/api/activitySign'
 import { useUserStore } from '@/stores/user'
 import { formatImageUrl } from '@/utils/imageUtils'
 
+const router = useRouter()
 const userStore = useUserStore()
 const activity = ref({})
 const enrollStatus = ref('none')
@@ -314,8 +316,11 @@ const checkEnrollStatus = async (actId) => {
 
 const handleEnroll = async () => {
   if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    window.location.href = '/login'
+    ElMessage({
+      message: '请先登录或注册账号',
+      type: 'warning',
+      duration: 10000
+    })
     return
   }
 

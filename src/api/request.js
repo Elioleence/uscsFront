@@ -63,10 +63,7 @@ request.interceptors.response.use(
     // 超过重试次数，处理错误
     if (error.response) {
       if (error.response.status === 401) {
-        ElMessage.error('登录已过期，请重新登录')
-        localStorage.removeItem('token')
-        localStorage.removeItem('userInfo')
-        window.location.href = '/login'
+        ElMessage.warning('请先登录')
       } else if (error.response.status === 502) {
         ElMessage.error('服务器繁忙，请稍后重试')
       } else {

@@ -120,6 +120,7 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
@@ -129,6 +130,7 @@ import { getUserNameById } from '@/utils/userUtils'
 import { useUserStore } from '@/stores/user'
 import { formatImageUrl } from '@/utils/imageUtils'
 
+const router = useRouter()
 const userStore = useUserStore()
 const club = ref({})
 const achievements = ref([])
@@ -200,8 +202,11 @@ const checkQuitStatus = async (clubId) => {
 
 const showJoinDialog = () => {
   if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    window.location.href = '/login'
+    ElMessage({
+      message: '请先登录或注册账号',
+      type: 'warning',
+      duration: 10000
+    })
     return
   }
   joinReason.value = ''
@@ -210,8 +215,11 @@ const showJoinDialog = () => {
 
 const handleJoin = async () => {
   if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    window.location.href = '/login'
+    ElMessage({
+      message: '请先登录或注册账号',
+      type: 'warning',
+      duration: 10000
+    })
     return
   }
 
@@ -227,8 +235,11 @@ const handleJoin = async () => {
 
 const showQuitDialog = async () => {
   if (!userStore.isLoggedIn) {
-    ElMessage.warning('请先登录')
-    window.location.href = '/login'
+    ElMessage({
+      message: '请先登录或注册账号',
+      type: 'warning',
+      duration: 10000
+    })
     return
   }
 
@@ -271,7 +282,7 @@ const formatTime = (time) => {
 }
 
 const goActivity = (id) => {
-  window.location.href = `/activity/detail/${id}`
+  router.push(`/activity/detail/${id}`)
 }
 </script>
 
