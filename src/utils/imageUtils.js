@@ -1,4 +1,5 @@
-const defaultAvatar = 'http://localhost:8080/api/upload/default.png'
+const baseUrl = import.meta.env.VITE_SERVER_URL
+const defaultAvatar = `${baseUrl}/upload/default.png`
 
 export const formatImageUrl = (url, isAvatar = false) => {
   if (!url) {
@@ -10,7 +11,7 @@ export const formatImageUrl = (url, isAvatar = false) => {
   }
   
   if (url.startsWith('/upload')) {
-    return `http://localhost:8080/api${url}`
+    return `${baseUrl}${url}`
   }
   
   return url

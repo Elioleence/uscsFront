@@ -30,7 +30,7 @@ import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
-import { formatAvatarUrl } from '@/utils/imageUtils'
+import { formatAvatarUrl, formatImageUrl } from '@/utils/imageUtils'
 
 const router = useRouter()
 const userStore = useUserStore()
@@ -40,7 +40,7 @@ const avatarUrl = computed(() => {
 })
 
 const handleAvatarError = (event) => {
-  event.target.src = 'http://localhost:8080/api/upload/default.png'
+  event.target.src = formatImageUrl('/upload/default.png', true)
 }
 
 const handleLogout = () => {

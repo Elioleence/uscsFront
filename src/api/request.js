@@ -1,8 +1,11 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
+// 读取生产环境完整后端域名
+const baseUrl = import.meta.env.VITE_SERVER_URL
+
 const request = axios.create({
-  baseURL: '/api',
+  baseURL: baseUrl,
   timeout: 30000 // 增加到30秒
 })
 
@@ -17,6 +20,11 @@ request.interceptors.request.use(
     const token = localStorage.getItem('token')
     if (token) {
       config.headers['Authorization'] = `Bearer ${token}`
+    }
+    // 加随机时间戳，彻底解决304缓存问题
+    config.params = {
+      ...config.params,
+      _t: Date.now()
     }
     return config
   },

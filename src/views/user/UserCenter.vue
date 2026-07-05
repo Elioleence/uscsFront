@@ -316,7 +316,7 @@ import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
 import UploadImg from '@/components/common/UploadImg.vue'
 import { useUserStore } from '@/stores/user'
-import { formatAvatarUrl } from '@/utils/imageUtils'
+import { formatAvatarUrl, formatImageUrl } from '@/utils/imageUtils'
 import { getMyEnrolls, cancelEnroll } from '@/api/activityEnroll'
 import { getMyApplies, cancelApply } from '@/api/club'
 import { checkIn, getMySigns } from '@/api/activitySign'
@@ -408,7 +408,7 @@ const avatarUrl = computed(() => {
 })
 
 const handleAvatarError = (event) => {
-  event.target.src = 'http://localhost:8080/api/upload/default.png'
+  event.target.src = formatImageUrl('/upload/default.png', true)
 }
 
 onMounted(async () => {
