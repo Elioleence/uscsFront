@@ -413,11 +413,8 @@ const handleAvatarError = (event) => {
 
 onMounted(async () => {
   if (!userStore.isLoggedIn) {
-    ElMessage({
-      message: '请先登录或注册账号',
-      type: 'warning',
-      duration: 10000
-    })
+    ElMessage.warning('请先登录')
+    router.push('/login')
     return
   }
   loadUserInfo()

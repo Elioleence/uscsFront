@@ -39,7 +39,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/stores/user'
@@ -50,6 +50,18 @@ const formRef = ref(null)
 const loginForm = ref({
   username: '',
   password: ''
+})
+
+onMounted(() => {
+  setTimeout(() => {
+    ElMessage({
+      message: '<p>测试用户名：stu01</p><p>密码：111</p>',
+      type: 'info',
+      duration: 15000,
+      dangerouslyUseHTMLString: true,
+      customClass: 'test-account-message'
+    })
+  }, 500)
 })
 
 const rules = {

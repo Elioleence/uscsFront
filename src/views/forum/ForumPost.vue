@@ -160,11 +160,8 @@ const loadComments = async (postId) => {
 
 const handleComment = async () => {
   if (!userStore.isLoggedIn) {
-    ElMessage({
-      message: '请先登录或注册账号',
-      type: 'warning',
-      duration: 10000
-    })
+    ElMessage.warning('请先登录')
+    window.location.href = '/login'
     return
   }
   
@@ -194,11 +191,8 @@ const formatTime = (time) => {
 
 const toggleReplyInput = (comment) => {
   if (!userStore.isLoggedIn) {
-    ElMessage({
-      message: '请先登录或注册账号',
-      type: 'warning',
-      duration: 10000
-    })
+    ElMessage.warning('请先登录')
+    window.location.href = '/login'
     return
   }
   if (replyTargetId.value === comment.id) {
