@@ -2,6 +2,7 @@
   <div class="achievement-list-page">
     <header-component />
     <sidebar-component />
+    <swiper-component />
 
     <div class="content">
       <div class="search-bar">
@@ -61,6 +62,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
+import SwiperComponent from '@/components/swiper/swiper.vue'
 import { getClubList } from '@/api/index'
 import { getPublicAchievementList } from '@/api/club'
 import { formatImageUrl } from '@/utils/imageUtils'

@@ -2,6 +2,7 @@
   <div class="forum-list-page">
     <header-component />
     <sidebar-component />
+    <swiper-component />
 
     <div class="content">
       <div class="search-bar">
@@ -64,6 +65,7 @@ import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
+import SwiperComponent from '@/components/swiper/swiper.vue'
 import { getPostList } from '@/api/index'
 import { getUserNameById } from '@/utils/userUtils'
 import { formatImageUrl } from '@/utils/imageUtils'

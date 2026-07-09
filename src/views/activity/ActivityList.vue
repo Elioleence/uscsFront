@@ -2,6 +2,7 @@
   <div class="activity-list-page">
     <header-component />
     <sidebar-component />
+    <swiper-component />
 
     <div class="content">
       <div class="search-bar">
@@ -72,6 +73,7 @@
 import { ref, onMounted } from 'vue'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
+import SwiperComponent from '@/components/swiper/swiper.vue'
 import { getActivityList } from '@/api/index'
 import { getActivityTypeList } from '@/api/activityType'
 import { formatImageUrl } from '@/utils/imageUtils'

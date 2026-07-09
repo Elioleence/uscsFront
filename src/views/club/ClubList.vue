@@ -2,6 +2,7 @@
   <div class="club-list-page">
     <header-component />
     <sidebar-component />
+    <swiper-component />
 
     <div class="content">
       <div class="search-bar">
@@ -65,6 +66,7 @@
 import { ref, onMounted, computed } from 'vue'
 import HeaderComponent from '@/components/header/header.vue'
 import SidebarComponent from '@/components/sidebar/sidebar.vue'
+import SwiperComponent from '@/components/swiper/swiper.vue'
 import { getClubList } from '@/api/index'
 import { getClubTypeName, getClubTypeOptions } from '@/utils/clubUtils'
 import { formatImageUrl } from '@/utils/imageUtils'

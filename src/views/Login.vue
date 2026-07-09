@@ -55,7 +55,7 @@ const loginForm = ref({
 onMounted(() => {
   setTimeout(() => {
     ElMessage({
-      message: '<p>测试用户名：stu01</p><p>密码：111</p>',
+      message: '<p>请使用测试用户名：stu01</p><p>密码：111</p>',
       type: 'info',
       duration: 15000,
       dangerouslyUseHTMLString: true,
